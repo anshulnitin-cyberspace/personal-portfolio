@@ -91,16 +91,38 @@
   // Contact Form Feedback
   // ================================
 
-  document.getElementById('contactForm').addEventListener('submit', function (e) {
+  document.getElementById('contactForm').addEventListener('submit', async function (e) {
     e.preventDefault();
-    const btn = this.querySelector('button[type="submit"]');
+    const form = e.target;
+    const btn = form.querySelector('button[type="submit"]');
     const originalText = btn.textContent;
-    btn.textContent = 'Message Sent!';
-    btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      const response = await fetch(form.action, {
+        method: form.method,
+        body: new FormData(form),
+        headers: { Accept: 'application/json' }
+      });
+
+      if (!response.ok) {
+        throw new Error('Form submission failed');
+      }
+
+      btn.textContent = 'Message Sent!';
+      btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+      form.reset();
+    } catch (error) {
+      btn.textContent = 'Try Again';
+      btn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+    }
+
     setTimeout(function () {
+      btn.disabled = false;
       btn.textContent = originalText;
       btn.style.background = '';
-      e.target.reset();
     }, 2500);
   });
 
